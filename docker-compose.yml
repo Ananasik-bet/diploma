@@ -7,28 +7,28 @@ volumes:
     driver: local
 
 services:
-  node-app:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    volumes:
-      - app_code:/app
-    environment:
-      - NODE_PORT=${NODE_PORT:-3000}
-    ports:
-      - "${NODE_PORT:-3000}:${NODE_PORT:-3000}"
-    restart: unless-stopped
+  # node-app:
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile
+  #   volumes:
+  #     - app_code:/app
+  #   environment:
+  #     - NODE_PORT=${NODE_PORT:-3000}
+  #   ports:
+  #     - "${NODE_PORT:-3000}:${NODE_PORT:-3000}"
+  #   restart: unless-stopped
 
   postgres:
     image: postgres
     volumes:
       - postgres_data:/var/lib/postgresql/data
     environment:
-      POSTGRES_DB: test
-      POSTGRES_USER: student
-      POSTGRES_PASSWORD: test
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     ports:
-      - 5432:5432
+      - "${POSTGRES_PORT:-5432}:${POSTGRES_PORT:-5432}"
     restart: unless-stopped
 
   pgadmin:
