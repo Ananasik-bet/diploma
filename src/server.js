@@ -8,6 +8,7 @@ const path = require('path');
 const { logRequest } = require('./middlewares/requestLogger.js');
 const router = express.Router();
 const { checkBannedIp } = require('./middlewares/checkIP.js')
+const { ddosProtection } = require('./middlewares/ddosProtection.js')
 
 
 // Load environment variables from .env file
@@ -46,6 +47,11 @@ app.use(bodyParser.urlencoded({ extended: true }));
 // Middleware to check if IP banned
 app.use((req, res, next) => {
   checkBannedIp(req, res, next);
+});
+
+// Middleware to protect from DDos Attack
+app.use((req, res, next) => {
+  ddosProtection(req, res, next);
 });
 
 // Middleware to log and save all incoming requests
