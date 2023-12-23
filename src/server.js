@@ -1,12 +1,3 @@
-// import express from 'express';
-// import helmet from 'helmet';
-// import dotenv from 'dotenv';
-// import morgan from 'morgan';
-// import bodyParser from 'body-parser';
-// import path from 'path';
-// import cors from 'cors';
-// import { createRequestLogTable, logRequest } from './middlewares/requestLogger.js';
-// import router from './routes/index.js';
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
@@ -16,6 +7,7 @@ const bodyParser = require('body-parser');
 const path = require('path');
 const { logRequest } = require('./middlewares/requestLogger.js');
 const router = express.Router();
+const { checkBannedIp } = require('./middlewares/checkIP.js')
 
 
 // Load environment variables from .env file
@@ -50,6 +42,11 @@ app.use(morgan('dev'));
 // Use body-parser for handling request bodies
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+
+// Middleware to check if IP banned
+app.use((req, res, next) => {
+  checkBannedIp(req, res, next);
+});
 
 // Middleware to log and save all incoming requests
 app.use((req, res, next) => {

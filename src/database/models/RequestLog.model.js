@@ -32,7 +32,8 @@ module.exports = (sequelize, DataTypes) => {
     },
     {
       sequelize,
-      modelName: '"RequestLog"', // Use double quotes around the table name
+      modelName: 'RequestLog',
+      tableName: 'RequestLog',
       timestamps: true,
     }
   );
