@@ -16,12 +16,18 @@ const checkBannedIp = async (req, res, next) => {
 
 const banIp = async (ip_address, reason) => {
   try {
-    // Add the IP address to the database
-    await db.BannedIP.create({
-      ip_address,
-      reason,
-    });
-    console.log('IP address banned:', ip_address, ' Reason: ', reason);
+
+    const isExist = db.BannedIP.findOne({ where: { ip_address: ip_address }})
+
+    if (!isExist){
+      // Add the IP address to the database
+      await db.BannedIP.create({
+        ip_address,
+        reason,
+      });
+      console.log('IP address banned:', ip_address, ' Reason: ', reason);
+    }
+    
   } catch (error) {
     console.error('Error banning IP address:', error.message);
   }

@@ -1,6 +1,8 @@
 const express = require('express');
 const api = express.Router();
 const { exec } = require('child_process');
+const { banIp } = require('../middlewares/checkIP');
+const { get_logs } = require('../controllers/request_log')
 
 api.get('/ping', async (req, res) => {
   res.json({
@@ -9,10 +11,49 @@ api.get('/ping', async (req, res) => {
   })
 });
 
+api.get('/ip-requests', async (req, res) => {
+  try{
+    const data = await get_logs();
+
+    res.status(200).json({
+      success: true,
+      data: data
+    })
+  } catch (e) {
+    res.status(404).json({
+      success: false,
+      message: e.message
+    })
+  }
+  
+
+})
+
+api.get('/ban-ip', async (req, res) => {
+  const {
+    ip,
+    reason
+  } = req.body;
+
+  try{
+    await banIp(ip, reason);
+    res.status(201).json({
+      success: true,
+      message: 'IP Banned',
+      reason: reason,
+      ip: ip
+    })
+  } catch (e) { 
+    res.status(400).json({
+      success: false,
+      message: e.message
+    })
+  }
+})
+
+
 api.get('/firewall-status', (req, res) => {
-  console.log('Here')
   exec('sudo iptables -L', (error, stdout, stderr) => {
-    console.log('Here')
     if (error) {
       return res.status(500).json({ message: 'Error retrieving firewall status' });
     }
