@@ -1,11 +1,7 @@
-import express from 'express';
-import dashboardRouter from './dashboard.router.js';
-import alertRouter from './alert.router.js';
+module.exports = (router) => {
+  router.use('/dashboard', require('./dashboard.router'))
 
-const router = express.Router();
-
-// Add routes here using dashboardRouter and alertRouter
-router.use('/dashboard', dashboardRouter);
-router.use('/alerts', alertRouter);
-
-export default router;
+  router.get("/", (req, res) => {
+    res.json({ message: "Welcome to the TEMP REST API" })
+  });
+}

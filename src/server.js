@@ -1,11 +1,22 @@
-import express from 'express';
-import helmet from 'helmet';
-import dotenv from 'dotenv';
-import morgan from 'morgan';
-import bodyParser from 'body-parser';
-import path from 'path';
-import { createRequestLogTable, logRequest } from './middlewares/requestLogger.js';
-import router from './routes/index.js';
+// import express from 'express';
+// import helmet from 'helmet';
+// import dotenv from 'dotenv';
+// import morgan from 'morgan';
+// import bodyParser from 'body-parser';
+// import path from 'path';
+// import cors from 'cors';
+// import { createRequestLogTable, logRequest } from './middlewares/requestLogger.js';
+// import router from './routes/index.js';
+const express = require('express');
+const cors = require('cors');
+const helmet = require('helmet');
+const dotenv = require('dotenv');
+const morgan = require('morgan');
+const bodyParser = require('body-parser');
+const path = require('path');
+const { logRequest } = require('./middlewares/requestLogger.js');
+const router = express.Router();
+
 
 // Load environment variables from .env file
 dotenv.config();
@@ -19,6 +30,20 @@ app.use(
   })
 );
 
+const corsOptions = {
+  origin: '*',
+  optionsSuccessStatus: 200,
+};
+
+app.use(cors(corsOptions));
+app.use(express.urlencoded({
+  limit: '10mb',
+  extended: true,
+}));
+app.use(express.json({
+  limit: '20mb',
+}));
+
 // Use morgan middleware for logging HTTP requests
 app.use(morgan('dev'));
 
@@ -26,22 +51,20 @@ app.use(morgan('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
+// Middleware to log and save all incoming requests
+app.use((req, res, next) => {
+  logRequest(req);
+  next();
+});
+
 // Define the main router for the application using index.js
-app.use(router);
+app.use('/api', router);
+require('./routes')(router);
 
 // Error handling middleware
 app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(500).send('Something went wrong!');
-});
-
-// Synchronize Sequelize models with the database
-createRequestLogTable();
-
-// Middleware to log and save all incoming requests
-app.use((req, res, next) => {
-  logRequest(req);
-  next();
 });
 
 const port = process.env.PORT || 3000;
