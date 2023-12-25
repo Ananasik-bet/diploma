@@ -33,7 +33,35 @@ const banIp = async (ip_address, reason) => {
   }
 };
 
+const banRequest = async (req, reason) => {
+  const { method, url, headers, query, params, body } = req;
+  const ip_address =
+    req.ip ||
+    req.connection.remoteAddress ||
+    req.socket.remoteAddress ||
+    req.connection.socket.remoteAddress;
+
+  try {
+    console.log('Here')
+    // Save the request log to the database
+    await db.BannedRequest.create({
+      method,
+      url,
+      headers,
+      query,
+      params,
+      body,
+      ip_address,
+      reason
+    });
+    console.log('Request banned and saved:', method, url);
+  } catch (error) {
+    console.error('Error saving request log:', error.message);
+  }
+};
+
 module.exports = {
     checkBannedIp,
-    banIp
+    banIp,
+    banRequest
 };

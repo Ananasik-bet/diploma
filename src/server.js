@@ -9,6 +9,9 @@ const { logRequest } = require('./middlewares/requestLogger.js');
 const router = express.Router();
 const { checkBannedIp } = require('./middlewares/checkIP.js')
 const { ddosProtection } = require('./middlewares/ddosProtection.js')
+const xssProtectionMiddleware = require('./middlewares/xssProtection.js');
+const { csrfProtectionWithBan } = require('./middlewares/csrfProtection.js')
+const { sqlInjectionDetection } = require('./middlewares/sqlInjectionDetection.js')
 
 
 // Load environment variables from .env file
@@ -44,6 +47,17 @@ app.use(morgan('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
+// Middleware to save from SQL injection
+app.use((req, res, next) => {
+  sqlInjectionDetection(req, res, next);
+});
+
+// Middleware to log and save all incoming requests
+app.use((req, res, next) => {
+  logRequest(req);
+  next();
+});
+
 // Middleware to check if IP banned
 app.use((req, res, next) => {
   checkBannedIp(req, res, next);
@@ -54,11 +68,15 @@ app.use((req, res, next) => {
   ddosProtection(req, res, next);
 });
 
-// Middleware to log and save all incoming requests
+// Middleware to protect from XSS Attack
 app.use((req, res, next) => {
-  logRequest(req);
-  next();
+  xssProtectionMiddleware(req, res, next);
 });
+
+// Middleware to protect from CSRF Attack
+// app.use((req, res, next) => {
+//   csrfProtectionWithBan(req, res, next);
+// });
 
 // Define the main router for the application using index.js
 app.use('/api', router);
